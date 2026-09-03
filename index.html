@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>เอกสารรูปภาพงานก่อสร้าง</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap');
+
+:root{
+  --ink:#1c1f24; --muted:#6b7280; --line:#d7dbe0; --bg:#eceff3;
+  --accent:#1d4ed8; --accent-ink:#fff; --card:#fff; --danger:#b91c1c;
+  --radius:10px;
+  --thai:'Sarabun','TH Sarabun New','Tahoma',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--thai);font-size:15px;line-height:1.5}
+button{font-family:inherit;font-size:14px;border:1px solid var(--line);background:#fff;color:var(--ink);
+  padding:7px 12px;border-radius:8px;cursor:pointer}
+button:hover{border-color:#9aa2ad;background:#f7f8fa}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+button.primary:hover{background:#1740b6}
+button.danger{color:var(--danger);border-color:#e6bcbc}
+input,select{font-family:inherit;font-size:14px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);width:100%}
+input:focus,select:focus{outline:2px solid #bfd0ff;border-color:var(--accent)}
+label.f{display:block;font-size:12.5px;color:var(--muted);margin-bottom:3px}
+
+/* ---------- control panel ---------- */
+.app{max-width:1040px;margin:0 auto;padding:14px 14px 4px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px}
+.brand{font-weight:700;font-size:17px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:12px;padding:0 14px}
+.card>summary{cursor:pointer;font-weight:600;padding:11px 0;list-style:none;display:flex;align-items:center;gap:8px}
+.card>summary::-webkit-details-marker{display:none}
+.card>summary::before{content:'▸';color:var(--muted);transition:transform .15s}
+.card[open]>summary::before{transform:rotate(90deg)}
+.card>.body{padding:2px 0 14px}
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+@media screen and (max-width:720px){.g2,.g3{grid-template-columns:1fr}}
+
+.secCard{border:1px solid var(--line);border-radius:var(--radius);padding:10px;margin-bottom:10px;background:#fbfcfd}
+.secHead{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.secHead .num{width:24px;height:24px;flex:none;border-radius:50%;background:var(--accent);color:#fff;
+  display:grid;place-items:center;font-size:12px;font-weight:700}
+.secHead .count{flex:none;color:var(--muted);font-size:13px;white-space:nowrap}
+.drop{border:1.5px dashed #b9c0ca;border-radius:8px;padding:12px;text-align:center;color:var(--muted);font-size:13.5px;background:#fff}
+.drop.over{border-color:var(--accent);background:#eef3ff;color:var(--accent)}
+.tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.tools .lbl{font-size:12.5px;color:var(--muted)}
+.tools button{padding:4px 9px;font-size:12.5px}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.thumb{position:relative;width:96px;height:76px;border:1px solid var(--line);border-radius:8px;overflow:hidden;
+  background:#fff;cursor:grab}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .idx{position:absolute;left:3px;top:3px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;
+  padding:1px 5px;border-radius:5px}
+.thumb .x,.thumb .rot{position:absolute;top:2px;background:rgba(0,0,0,.6);color:#fff;border:0;border-radius:5px;
+  padding:0 5px;font-size:12px;line-height:18px;cursor:pointer;display:none}
+.thumb .x{right:2px}
+.thumb .rot{right:26px;font-size:13px}
+.thumb:hover .x,.thumb:hover .rot{display:block}
+.thumb.drag{opacity:.35}
+.thumb.dropbefore{box-shadow:-3px 0 0 0 var(--accent)}
+.thumb.dropafter{box-shadow:3px 0 0 0 var(--accent)}
+.secHead .delsec{flex:none;padding:4px 9px;font-size:12.5px}
+.addSec{width:100%;border-style:dashed;color:var(--accent);border-color:#b7c6ee;font-weight:600}
+.hint{color:var(--muted);font-size:12.5px;margin-top:6px}
+.signrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+@media screen and (max-width:720px){.signrow{grid-template-columns:1fr}}
+
+/* ---------- paper ---------- */
+#pages{padding:6px 0 40px}
+.sheet{--fs:1;--imgmax:none;width:210mm;min-height:297mm;background:#fff;margin:0 auto 12px;padding:13mm 13mm 15mm;
+  box-shadow:0 3px 14px rgba(20,30,50,.18);display:flex;flex-direction:column;position:relative;
+  font-family:var(--thai);color:#000}
+.sheetHead{text-align:center;padding-bottom:0;margin-bottom:5mm}
+.docTitle{font-size:calc(16pt * var(--fs));font-weight:700;line-height:1.25}
+.projName{font-size:calc(14pt * var(--fs));margin-top:1mm;line-height:1.25}
+.metaLine{font-size:calc(11.5pt * var(--fs));color:#222;margin-top:1mm;line-height:1.3}
+.secTitleP{font-size:calc(14pt * var(--fs));font-weight:700;margin-top:2mm;text-align:center}
+.photoArea{flex:1;min-height:0;display:grid;gap:5mm;grid-auto-rows:minmax(0,1fr);align-content:start}
+.photoArea.fixed{flex:0 0 auto;grid-auto-rows:auto}
+.photoArea.fixed .imgbox{flex:none;height:var(--imgmax);max-height:none}
+.spacer{flex:1 1 auto;min-height:0}
+.pp1{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr)}
+.pp2{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
+.pp4{grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
+.pp6{grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,minmax(0,1fr))}
+.slot{display:flex;flex-direction:column;justify-content:center;min-height:0;position:relative}
+.imgbox{flex:1 1 0;min-height:0;max-height:var(--imgmax);border:1px solid #555;background:#fff;overflow:hidden;display:flex;
+  align-items:center;justify-content:center}
+.imgbox img{width:100%;height:100%;display:block}
+.fit .imgbox img{object-fit:contain}
+.fill .imgbox img{object-fit:cover}
+.cap{margin-top:1.5mm;text-align:center;font-size:calc(12pt * var(--fs));min-height:1.3em;outline:none;line-height:1.3}
+.cap:empty::before{content:attr(data-ph);color:#aaa}
+.cap:focus{background:#fffbdc}
+.slotTools{position:absolute;right:3px;top:3px;display:none;gap:3px;z-index:5}
+.slot:hover .slotTools{display:flex}
+.slotTools button{padding:2px 7px;font-size:12px;background:rgba(255,255,255,.94);border-radius:6px}
+.sheetFoot{margin-top:2.5mm;display:flex;justify-content:space-between;font-size:calc(10pt * var(--fs));color:#333}
+.sheet .drophere{outline:3px dashed var(--accent);outline-offset:-3px}
+
+/* signature strip on every page */
+.signStrip{display:grid;grid-template-columns:max-content;justify-content:center;gap:1.2mm;margin-top:2mm}
+.sg{display:flex;align-items:baseline;gap:2mm;font-size:calc(11pt * var(--fs));line-height:1.6;white-space:nowrap}
+.sg .who{flex:0 1 auto}
+.sg .ps{color:#222}
+.sg .lbl{flex:none}
+.sg .ln{flex:0 0 auto;width:40mm;height:0;border-bottom:1px dotted #000;position:relative;top:1mm}
+
+/* signature page */
+.signBody{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-evenly;padding:4mm 0}
+.signGroup{margin:0}
+.signGroupTitle{font-size:calc(14pt * var(--fs));font-weight:700;margin:0}
+.sigItem{margin:0;text-align:center;font-size:calc(13pt * var(--fs));line-height:1.8}
+.sigItem .dots{display:inline-block;min-width:70mm;border-bottom:1px dotted #000;height:1.2em;vertical-align:-2px}
+.sigNote{font-size:13pt;color:#333;margin-top:2mm}
+
+.empty{width:210mm;margin:0 auto;padding:40px;text-align:center;color:var(--muted);
+  background:#fff;border:1px dashed var(--line);border-radius:var(--radius)}
+
+@media screen and (max-width:900px){
+  .sheet,.empty{width:100%;min-height:0;padding:6mm}
+  .photoArea{display:block}
+  .slot{margin-bottom:10px}
+  .imgbox{height:60vw}
+}
+
+/* ---------- print ---------- */
+@page{size:A4 portrait;margin:0}
+@media print{
+  body{background:#fff}
+  .no-print{display:none!important}
+  #pages{padding:0}
+  .sheet{width:210mm;height:296mm;min-height:0;margin:0;box-shadow:none;page-break-after:always;overflow:hidden}
+  .sheet:last-child{page-break-after:auto}
+  .slotTools{display:none!important}
+  .cap:empty::before{content:''}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+
+<div class="app no-print">
+  <div class="bar">
+    <div class="brand">เอกสารภาพถ่ายประกอบการส่งงานก่อสร้าง</div>
+    <div class="actions">
+      <button id="btnPrint" class="primary">พิมพ์ / บันทึก PDF</button>
+      <button id="btnSave">บันทึกโปรเจกต์</button>
+      <button id="btnOpen">เปิดโปรเจกต์</button>
+      <button id="btnClear" class="danger">ล้างทั้งหมด</button>
+    </div>
+  </div>
+
+  <details class="card" open>
+    <summary>1. ข้อมูลโครงการ</summary>
+    <div class="body">
+      <div class="grid g2">
+        <div><label class="f">ชื่อเอกสาร (หัวกระดาษ)</label><input id="m_doc" placeholder="ภาพถ่ายประกอบการส่งงาน"></div>
+        <div><label class="f">ชื่อโครงการ</label><input id="m_project" placeholder="โครงการก่อสร้างถนน คสล. หมู่ที่ ..."></div>
+        <div><label class="f">สถานที่ก่อสร้าง</label><input id="m_location" placeholder="หมู่ที่ ... ตำบล ... อำเภอ ..."></div>
+        <div><label class="f">สัญญาเลขที่ / วันที่</label><input id="m_contract" placeholder="เลขที่ .../2569 ลงวันที่ ..."></div>
+        <div><label class="f">ผู้รับจ้าง</label><input id="m_contractor" placeholder="บริษัท/ห้างหุ้นส่วน ..."></div>
+        <div><label class="f">งวดงาน / วันที่ตรวจ</label><input id="m_period" placeholder="งวดที่ 1 ตรวจรับวันที่ ..."></div>
+      </div>
+      <div class="hint">ข้อมูลบรรทัดที่กรอกเท่านั้นจะแสดงบนหัวกระดาษทุกหน้า (เว้นว่างได้)</div>
+    </div>
+  </details>
+
+  <details class="card" open>
+    <summary>2. รูปภาพ (อัพโหลด + จัดลำดับ)</summary>
+    <div class="body" id="secList"></div>
+    <div class="hint" style="padding-bottom:12px">
+      จัดลำดับ: ลากรูปย่อสลับตำแหน่งได้ · ย้ายข้ามหมวดโดยลากไปวางที่กรอบเส้นประของหมวดปลายทาง · หรือใช้ปุ่ม ◀ ▶ บนรูปในหน้ากระดาษ ·
+      หมุนรูป: ปุ่ม ↻ บนรูปย่อหรือบนหน้ากระดาษ (หมุนครั้งละ 90°) · คำบรรยายใต้รูป: คลิกที่ข้อความใต้รูปในหน้ากระดาษแล้วพิมพ์ได้เลย
+    </div>
+  </details>
+
+  <details class="card">
+    <summary>3. ลายเซ็นท้ายเอกสาร</summary>
+    <div class="body">
+      <div class="grid g2">
+        <div><label class="f">จำนวนคณะกรรมการ</label><select id="nCom"></select></div>
+        <div><label class="f">จำนวนผู้ควบคุมงาน</label><select id="nSup"></select></div>
+      </div>
+      <div style="margin-top:12px"><b style="font-size:14px">คณะกรรมการตรวจรับพัสดุ</b><div id="comList" style="margin-top:8px"></div></div>
+      <div style="margin-top:6px"><b style="font-size:14px">ผู้ควบคุมงาน</b><div id="supList" style="margin-top:8px"></div></div>
+      <div class="hint">เว้นชื่อว่างไว้ได้ ถ้าต้องการให้เป็นเส้นประสำหรับเขียนมือ</div>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary>4. รูปแบบหน้ากระดาษ</summary>
+    <div class="body">
+      <div class="grid g3">
+        <div><label class="f">จำนวนรูปต่อหน้า</label><select id="perPage"><option value="1">1 รูป</option><option value="2" selected>2 รูป</option><option value="4">4 รูป</option><option value="6">6 รูป</option></select></div>
+        <div><label class="f">การจัดรูปในกรอบ</label><select id="fitMode"><option value="fit">พอดีกรอบ (เห็นเต็มรูป)</option><option value="fill">เต็มกรอบ (ตัดขอบ)</option></select></div>
+        <div><label class="f">แสดงคำบรรยายใต้รูป</label><select id="showCap"><option value="1" selected>แสดง</option><option value="0">ไม่แสดง</option></select></div>
+        <div><label class="f">เลขลำดับรูป</label><select id="showNum"><option value="1" selected>แสดง (รูปที่ 1, 2, ...)</option><option value="0">ไม่แสดง</option></select></div>
+        <div><label class="f">หัวกระดาษหน้าถัดไป</label><select id="headEvery"><option value="1" selected>แสดงทุกหน้า</option><option value="0">แสดงเฉพาะหน้าแรกของหมวด</option></select></div>
+        <div><label class="f">เลขหน้า</label><select id="showPage"><option value="1" selected>แสดง</option><option value="0">ไม่แสดง</option></select></div>
+        <div><label class="f">ขนาดรูปในกรอบ</label><select id="imgSize">
+          <option value="l">ใหญ่</option><option value="m" selected>กลาง</option><option value="s">เล็ก</option>
+        </select></div>
+        <div><label class="f">ขนาดตัวอักษรในเอกสาร</label><select id="fs">
+          <option value="1" selected>มาตรฐาน</option><option value="0.9">เล็ก</option><option value="0.8">เล็กมาก</option>
+        </select></div>
+        <div><label class="f">ตำแหน่งลายเซ็น</label><select id="signMode">
+          <option value="every" selected>ท้ายทุกหน้า</option>
+          <option value="none">ไม่มีลายเซ็น</option>
+          <option value="last">หน้าลายเซ็นท้ายเอกสารหน้าเดียว</option>
+          <option value="both">ท้ายทุกหน้า + หน้าลายเซ็นท้ายเอกสาร</option>
+        </select></div>
+      </div>
+    </div>
+  </details>
+</div>
+
+<div id="pages"></div>
+
+<input type="file" id="filePick" accept="image/*" multiple hidden>
+<input type="file" id="projPick" accept="application/json,.json" hidden>
+
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const el = (t,c) => { const n=document.createElement(t); if(c) n.className=c; return n; };
+const esc = s => (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const DEFAULT_SECTIONS = ['รูปก่อนดำเนินการ','รูประหว่างดำเนินการ','รูปดำเนินการแล้วเสร็จ','รูปการตรวจรับพัสดุ'];
+const COM_POS = ['ประธานกรรมการ','กรรมการ','กรรมการ','กรรมการ','กรรมการ'];
+
+let uid = 1;
+const state = {
+  meta:{doc:'ภาพถ่ายประกอบการส่งงาน',project:'',location:'',contract:'',contractor:'',period:''},
+  sections: DEFAULT_SECTIONS.map(t=>({title:t,photos:[]})),
+  committee: [ {name:'',pos:'ประธานกรรมการ'},{name:'',pos:'กรรมการ'},{name:'',pos:'กรรมการ'} ],
+  inspectors: [ {name:'',pos:'ผู้ควบคุมงาน'} ],
+  opt:{perPage:2,fit:'fit',showCap:1,showNum:1,headEvery:1,showPage:1,signMode:'every',fs:1,imgSize:'m'}
+};
+
+/* ---------- images ---------- */
+function readImage(file){
+  return new Promise(res=>{
+    const fr = new FileReader();
+    fr.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 1600;
+        const sc = Math.min(1, MAX/Math.max(img.width,img.height));
+        const c = el('canvas');
+        c.width = Math.max(1,Math.round(img.width*sc));
+        c.height = Math.max(1,Math.round(img.height*sc));
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        res({id:uid++, src:c.toDataURL('image/jpeg',0.85), caption:'', name:file.name, time:file.lastModified||0});
+      };
+      img.onerror = () => res(null);
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+async function addFiles(si, fileList){
+  const files = Array.from(fileList).filter(f=>/^image\//.test(f.type));
+  if(!files.length) return;
+  files.sort((a,b)=>a.name.localeCompare(b.name,'th',{numeric:true}));
+  const box = $('#secList');
+  box.style.opacity = .55;
+  for(const f of files){
+    const p = await readImage(f);
+    if(p) state.sections[si].photos.push(p);
+  }
+  box.style.opacity = 1;
+  render();
+}
+
+/* ---------- move / reorder ---------- */
+function rotatePhoto(si, i, deg){
+  const p = state.sections[si] && state.sections[si].photos[i];
+  if(!p) return;
+  const img = new Image();
+  img.onload = () => {
+    const sw = img.width, sh = img.height;
+    const c = el('canvas');
+    const swap = (deg % 180) !== 0;
+    c.width  = swap ? sh : sw;
+    c.height = swap ? sw : sh;
+    const ctx = c.getContext('2d');
+    ctx.translate(c.width/2, c.height/2);
+    ctx.rotate(deg * Math.PI / 180);
+    ctx.drawImage(img, -sw/2, -sh/2);
+    p.src = c.toDataURL('image/jpeg', 0.9);
+    render();
+  };
+  img.src = p.src;
+}
+function movePhoto(fromS, fromI, toS, toI){
+  const arr = state.sections[fromS].photos;
+  const [p] = arr.splice(fromI,1);
+  const dst = state.sections[toS].photos;
+  if(toI < 0 || toI > dst.length) toI = dst.length;
+  dst.splice(toI,0,p);
+  render();
+}
+function shift(si,i,d){
+  const a = state.sections[si].photos;
+  const j = i+d;
+  if(j<0||j>=a.length) return;
+  [a[i],a[j]] = [a[j],a[i]];
+  render();
+}
+
+/* ---------- control panel render ---------- */
+function renderPanel(){
+  const box = $('#secList');
+  box.innerHTML = '';
+  state.sections.forEach((sec,si)=>{
+    const c = el('div','secCard'); c.dataset.s = si;
+    c.innerHTML =
+      '<div class="secHead"><span class="num">'+(si+1)+'</span>'+
+      '<input class="secTitle" value="'+esc(sec.title)+'">'+
+      '<span class="count">'+sec.photos.length+' รูป</span>'+
+      '<button class="danger delsec" data-act="delsec" title="ลบหมวดนี้">ลบหมวด</button></div>'+
+      '<div class="drop">ลากไฟล์รูปมาวางที่นี่ หรือ <button class="pick">เลือกรูป...</button></div>'+
+      '<div class="tools"><span class="lbl">เรียงลำดับ:</span>'+
+      '<button data-sort="name">ตามชื่อไฟล์</button>'+
+      '<button data-sort="time">ตามเวลาถ่าย/ไฟล์</button>'+
+      '<button data-sort="rev">กลับลำดับ</button>'+
+      '<button data-sort="clear" class="danger">ลบรูปทั้งหมดในหมวด</button></div>'+
+      '<div class="thumbs"></div>';
+    const th = c.querySelector('.thumbs');
+    sec.photos.forEach((p,i)=>{
+      const t = el('div','thumb');
+      t.draggable = true; t.dataset.s = si; t.dataset.i = i;
+      t.innerHTML = '<img src="'+p.src+'" alt=""><span class="idx">'+(i+1)+'</span>'+
+        '<button class="rot" title="หมุน 90°">↻</button><button class="x" title="ลบรูปนี้">✕</button>';
+      th.appendChild(t);
+    });
+    box.appendChild(c);
+  });
+  const add = el('button','addSec');
+  add.id = 'addSec';
+  add.textContent = '+ เพิ่มหมวดใหม่';
+  box.appendChild(add);
+
+  const nCom = $('#nCom'), nSup = $('#nSup');
+  if(!nCom.options.length){
+    [0,1,2,3,4,5].forEach(n=>nCom.add(new Option(n===0?'ไม่มี':(n+' ท่าน'), n)));
+    [0,1,2].forEach(n=>nSup.add(new Option(n===0?'ไม่มี':(n+' ท่าน'), n)));
+  }
+  nCom.value = state.committee.length; nSup.value = state.inspectors.length;
+
+  const fill = (listId, arr, key) => {
+    const w = $(listId); w.innerHTML='';
+    arr.forEach((m,i)=>{
+      const r = el('div','signrow');
+      r.innerHTML = '<div><label class="f">ชื่อ-สกุล คนที่ '+(i+1)+'</label>'+
+        '<input data-k="'+key+'" data-i="'+i+'" data-f="name" value="'+esc(m.name)+'" placeholder="เว้นว่าง = เส้นประ"></div>'+
+        '<div><label class="f">ตำแหน่ง</label>'+
+        '<input data-k="'+key+'" data-i="'+i+'" data-f="pos" value="'+esc(m.pos)+'"></div>';
+      w.appendChild(r);
+    });
+  };
+  fill('#comList', state.committee, 'committee');
+  fill('#supList', state.inspectors, 'inspectors');
+}
+
+/* ---------- paper render ---------- */
+const IMG_MAX = {1:{s:150,m:175,l:205},2:{s:75,m:88,l:103},4:{s:68,m:78,l:92},6:{s:46,m:52,l:62}};
+function imgMaxMM(){
+  const t = IMG_MAX[state.opt.perPage] || IMG_MAX[2];
+  return t[state.opt.imgSize] || t.m;
+}
+function sheetStyle(){
+  return ' style="--fs:'+state.opt.fs+';--imgmax:'+imgMaxMM()+'mm"';
+}
+/* ย่อรูป/ตัวอักษรอัตโนมัติเมื่อเนื้อหาหน้านั้นล้นกระดาษ (เช่นชื่อโครงการยาว หรือกรรมการหลายท่าน) */
+function autofit(){
+  if(window.innerWidth < 900) return;
+  const LIMIT = 297 * 96 / 25.4 + 2;
+  document.querySelectorAll('.sheet').forEach(sh=>{
+    const pa = sh.querySelector('.photoArea.fixed');
+    let mm = imgMaxMM(), fs = state.opt.fs, guard = 0;
+    while(guard++ < 40 && sh.offsetHeight > LIMIT){
+      if(pa && mm > 30){ mm -= 3; sh.style.setProperty('--imgmax', mm+'mm'); }
+      else if(fs > 0.7){ fs = +(fs - 0.04).toFixed(2); sh.style.setProperty('--fs', fs); }
+      else break;
+    }
+  });
+}
+function headHTML(secTitle, si){
+  const m = state.meta;
+  let h = '<div class="sheetHead">';
+  if(m.doc) h += '<div class="docTitle">'+esc(m.doc)+'</div>';
+  if(m.project) h += '<div class="projName">'+esc(m.project)+'</div>';
+  const bits = [];
+  if(m.location) bits.push('สถานที่: '+m.location);
+  if(m.contract) bits.push('สัญญา'+m.contract);
+  if(m.contractor) bits.push('ผู้รับจ้าง: '+m.contractor);
+  if(m.period) bits.push(m.period);
+  if(bits.length) h += '<div class="metaLine">'+esc(bits.join('   |   '))+'</div>';
+  if(secTitle) h += '<div class="secTitleP">'+esc(secTitle)+'</div>';
+  h += '</div>';
+  return h;
+}
+function slotHTML(p, si, i){
+  const o = state.opt;
+  const num = o.showNum ? 'รูปที่ '+(i+1)+' ' : '';
+  return '<div class="slot '+o.fit+'" data-s="'+si+'" data-i="'+i+'" draggable="true">'+
+    '<div class="slotTools no-print">'+
+      '<button data-act="prev" title="เลื่อนขึ้น/ก่อนหน้า">◀</button>'+
+      '<button data-act="next" title="เลื่อนลง/ถัดไป">▶</button>'+
+      '<button data-act="rot" title="หมุนรูป 90°">↻</button>'+
+      '<button data-act="del" title="ลบรูป">✕</button>'+
+    '</div>'+
+    '<div class="imgbox"><img src="'+p.src+'" alt=""></div>'+
+    (o.showCap ? '<div class="cap" contenteditable="true" data-cap="1" data-s="'+si+'" data-i="'+i+'" data-ph="'+num+'(คลิกเพื่อพิมพ์คำบรรยาย)">'+esc(p.caption)+'</div>' : '')+
+  '</div>';
+}
+function signStripHTML(list){
+  if(!list || !list.length) return '';
+  let s = '<div class="signStrip">';
+  list.forEach(m=>{
+    const who = (m.name ? esc(m.name)+' ' : '') + '<span class="ps">('+esc(m.pos)+')</span>';
+    s += '<div class="sg"><span class="who">'+who+'</span>'+
+         '<span class="lbl">ลงชื่อ</span><span class="ln"></span></div>';
+  });
+  return s + '</div>';
+}
+function signHTML(){
+  const g = (title, arr) => {
+    if(!arr.length) return '';
+    let s = '<div class="signGroupTitle">'+esc(title)+'</div>';
+    arr.forEach(m=>{
+      const nm = m.name ? esc(m.name) : '';
+      s += '<div class="sigItem">ลงชื่อ <span class="dots"></span> '+esc(m.pos)+
+           '<div>( '+(nm || '<span class="dots" style="min-width:60mm"></span>')+' )</div></div>';
+    });
+    return s;
+  };
+  return '<div class="signBody">'+ g('คณะกรรมการตรวจรับพัสดุ', state.committee) + g('ผู้ควบคุมงาน', state.inspectors) +'</div>';
+}
+function renderPaper(){
+  const o = state.opt;
+  const pages = $('#pages');
+  const sheets = [];
+  state.sections.forEach((sec,si)=>{
+    for(let i=0;i<sec.photos.length;i+=o.perPage){
+      sheets.push({type:'p', si, start:i, items:sec.photos.slice(i,i+o.perPage)});
+    }
+  });
+  const hasPhotos = sheets.length>0;
+  const signers = state.committee.length + state.inspectors.length;
+  if(signers && (o.signMode==='last' || o.signMode==='both' || (!hasPhotos && o.signMode!=='none'))) sheets.push({type:'sign'});
+  if(!signers && !hasPhotos) sheets.length = 0;
+  const total = sheets.length;
+
+  let html = '';
+  if(!hasPhotos) html += '<div class="empty no-print">ยังไม่มีรูปภาพ — เพิ่มรูปในหัวข้อ “2. รูปภาพ” ด้านบน<br>(หน้าลายเซ็นแสดงตัวอย่างไว้ให้ด้านล่างแล้ว)</div>';
+
+  sheets.forEach((sh,pi)=>{
+    html += '<div class="sheet"'+sheetStyle()+'>';
+    if(sh.type==='p'){
+      const showHead = o.headEvery ? true : (sh.start===0);
+      html += showHead ? headHTML(state.sections[sh.si].title, sh.si) : headHTML('', sh.si);
+      const withSign = (o.signMode==='every' || o.signMode==='both');
+      html += '<div class="photoArea pp'+o.perPage+(withSign?' fixed':'')+'">';
+      sh.items.forEach((p,k)=> html += slotHTML(p, sh.si, sh.start+k));
+      for(let k=sh.items.length;k<o.perPage;k++) html += '<div class="slot"></div>';
+      html += '</div>';
+      if(withSign) html += signStripHTML(state.committee) + '<div class="spacer"></div>' + signStripHTML(state.inspectors);
+    }else{
+      html += headHTML('', -1) + signHTML();
+    }
+    html += '<div class="sheetFoot"><span></span>'+(o.showPage?'<span>หน้า '+(pi+1)+' / '+total+'</span>':'')+'</div>';
+    html += '</div>';
+  });
+  pages.innerHTML = html;
+  autofit();
+}
+function render(){ renderPanel(); renderPaper(); }
+
+/* ---------- events ---------- */
+let pickTarget = 0;
+$('#secList').addEventListener('click', e=>{
+  if(e.target.id === 'addSec'){
+    state.sections.push({title:'หมวดใหม่', photos:[]});
+    render();
+    return;
+  }
+  const card = e.target.closest('.secCard'); if(!card) return;
+  const si = +card.dataset.s;
+  if(e.target.dataset.act === 'delsec'){
+    if(state.sections.length <= 1){ alert('ต้องมีอย่างน้อย 1 หมวด'); return; }
+    const n = state.sections[si].photos.length;
+    if(confirm('ลบหมวด "'+state.sections[si].title+'"'+(n?(' พร้อมรูป '+n+' รูป'):'')+' ?')){
+      state.sections.splice(si,1); render();
+    }
+    return;
+  }
+  if(e.target.classList.contains('pick')){ pickTarget = si; $('#filePick').value=''; $('#filePick').click(); }
+  if(e.target.classList.contains('x')){
+    const t = e.target.closest('.thumb');
+    state.sections[+t.dataset.s].photos.splice(+t.dataset.i,1); render();
+  }
+  if(e.target.classList.contains('rot')){
+    const t = e.target.closest('.thumb');
+    rotatePhoto(+t.dataset.s, +t.dataset.i, 90);
+    return;
+  }
+  const s = e.target.dataset.sort;
+  if(s){
+    const a = state.sections[si].photos;
+    if(s==='name') a.sort((x,y)=>x.name.localeCompare(y.name,'th',{numeric:true}));
+    if(s==='time') a.sort((x,y)=>x.time-y.time);
+    if(s==='rev') a.reverse();
+    if(s==='clear'){ if(confirm('ลบรูปทั้งหมดในหมวดนี้?')) state.sections[si].photos=[]; }
+    render();
+  }
+});
+$('#secList').addEventListener('input', e=>{
+  if(e.target.classList.contains('secTitle')){
+    state.sections[+e.target.closest('.secCard').dataset.s].title = e.target.value;
+    renderPaperOnly();
+  }
+});
+function renderPaperOnly(){ renderPaper(); }
+
+$('#filePick').addEventListener('change', e=> addFiles(pickTarget, e.target.files));
+
+/* drag & drop files onto section */
+document.addEventListener('dragover', e=>{
+  const d = e.target.closest && e.target.closest('.drop');
+  if(d && e.dataTransfer.types.includes('Files')){ e.preventDefault(); d.classList.add('over'); }
+});
+document.addEventListener('dragleave', e=>{
+  const d = e.target.closest && e.target.closest('.drop'); if(d) d.classList.remove('over');
+});
+document.addEventListener('drop', e=>{
+  const d = e.target.closest && e.target.closest('.drop');
+  if(d && e.dataTransfer.files.length){
+    e.preventDefault(); d.classList.remove('over');
+    addFiles(+d.closest('.secCard').dataset.s, e.dataTransfer.files);
+  }
+});
+
+/* drag reorder (thumbs + slots) */
+let dragSrc = null;
+document.addEventListener('dragstart', e=>{
+  const n = e.target.closest && e.target.closest('.thumb,.slot');
+  if(!n || n.dataset.i===undefined) return;
+  dragSrc = {s:+n.dataset.s, i:+n.dataset.i};
+  n.classList.add('drag');
+  e.dataTransfer.effectAllowed='move';
+  try{ e.dataTransfer.setData('text/plain','photo'); }catch(_){}
+});
+document.addEventListener('dragend', ()=>{
+  dragSrc=null;
+  document.querySelectorAll('.drag,.dropbefore,.dropafter,.drophere').forEach(n=>
+    n.classList.remove('drag','dropbefore','dropafter','drophere'));
+});
+document.addEventListener('dragover', e=>{
+  if(!dragSrc) return;
+  const dz = e.target.closest && e.target.closest('.drop');
+  if(dz){ e.preventDefault(); dz.classList.add('over'); return; }
+  const n = e.target.closest && e.target.closest('.thumb,.slot');
+  if(!n || n.dataset.i===undefined) return;
+  e.preventDefault();
+  document.querySelectorAll('.dropbefore,.dropafter,.drophere').forEach(x=>x.classList.remove('dropbefore','dropafter','drophere'));
+  if(n.classList.contains('thumb')){
+    const r = n.getBoundingClientRect();
+    n.classList.add(e.clientX < r.left + r.width/2 ? 'dropbefore' : 'dropafter');
+  } else n.classList.add('drophere');
+});
+document.addEventListener('drop', e=>{
+  if(!dragSrc) return;
+  const dz = e.target.closest && e.target.closest('.drop');
+  if(dz){
+    e.preventDefault(); dz.classList.remove('over');
+    const toS = +dz.closest('.secCard').dataset.s;
+    const src = dragSrc; dragSrc = null;
+    movePhoto(src.s, src.i, toS, state.sections[toS].photos.length);
+    return;
+  }
+  const n = e.target.closest && e.target.closest('.thumb,.slot');
+  if(!n || n.dataset.i===undefined) return;
+  e.preventDefault();
+  let toS = +n.dataset.s, toI = +n.dataset.i;
+  if(n.classList.contains('thumb')){
+    const r = n.getBoundingClientRect();
+    if(e.clientX > r.left + r.width/2) toI += 1;
+  }
+  if(dragSrc.s===toS && dragSrc.i<toI) toI -= 1;
+  const src = dragSrc; dragSrc = null;
+  if(src.s===toS && src.i===toI){ render(); return; }
+  movePhoto(src.s, src.i, toS, toI);
+});
+
+/* slot buttons + caption */
+$('#pages').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-act]'); if(!b) return;
+  const sl = b.closest('.slot'); const si=+sl.dataset.s, i=+sl.dataset.i;
+  const act = b.dataset.act;
+  if(act==='prev') shift(si,i,-1);
+  if(act==='next') shift(si,i,1);
+  if(act==='rot') rotatePhoto(si,i,90);
+  if(act==='del'){ state.sections[si].photos.splice(i,1); render(); }
+});
+$('#pages').addEventListener('input', e=>{
+  const c = e.target.closest('[data-cap]'); if(!c) return;
+  state.sections[+c.dataset.s].photos[+c.dataset.i].caption = c.innerText.replace(/\n+$/,'');
+});
+$('#pages').addEventListener('paste', e=>{
+  const c = e.target.closest('[data-cap]'); if(!c) return;
+  e.preventDefault();
+  document.execCommand('insertText', false, (e.clipboardData||window.clipboardData).getData('text'));
+});
+
+/* meta + options */
+['doc','project','location','contract','contractor','period'].forEach(k=>{
+  $('#m_'+k).addEventListener('input', e=>{ state.meta[k]=e.target.value; renderPaperOnly(); });
+});
+const optMap = {perPage:'perPage',fitMode:'fit',showCap:'showCap',showNum:'showNum',headEvery:'headEvery',showPage:'showPage',signMode:'signMode',fs:'fs',imgSize:'imgSize'};
+Object.keys(optMap).forEach(id=>{
+  $('#'+id).addEventListener('change', e=>{
+    const v = e.target.value;
+    state.opt[optMap[id]] = (id==='fitMode'||id==='signMode'||id==='imgSize') ? v : +v;
+    render();
+  });
+});
+$('#nCom').addEventListener('change', e=>{
+  const n=+e.target.value;
+  while(state.committee.length<n) state.committee.push({name:'',pos:COM_POS[state.committee.length]||'กรรมการ'});
+  state.committee.length = n; render();
+});
+$('#nSup').addEventListener('change', e=>{
+  const n=+e.target.value;
+  while(state.inspectors.length<n) state.inspectors.push({name:'',pos:'ผู้ควบคุมงาน'});
+  state.inspectors.length = n; render();
+});
+document.addEventListener('input', e=>{
+  const k = e.target.dataset && e.target.dataset.k;
+  if(k!=='committee' && k!=='inspectors') return;
+  state[k][+e.target.dataset.i][e.target.dataset.f] = e.target.value;
+  renderPaperOnly();
+});
+
+/* toolbar */
+$('#btnPrint').addEventListener('click', ()=>{ document.activeElement && document.activeElement.blur(); window.print(); });
+$('#btnClear').addEventListener('click', ()=>{
+  if(!confirm('ล้างข้อมูลทั้งหมด (รูปและข้อความ)?')) return;
+  state.sections.forEach(s=>s.photos=[]);
+  Object.keys(state.meta).forEach(k=>{ if(k!=='doc') state.meta[k]=''; });
+  syncInputs(); render();
+});
+let dlNS = null, dlTried = false;
+async function downloadsNS(){
+  if(dlTried) return dlNS;
+  dlTried = true;
+  try{ if(window.claude && typeof window.claude.use === 'function') dlNS = await window.claude.use('downloads'); }
+  catch(_){ dlNS = null; }
+  return dlNS;
+}
+async function saveFile(name, text){
+  const ns = await downloadsNS();
+  if(ns){
+    try{ await ns.save({filename:name, data:text}); return; }
+    catch(err){ if(err && (err.code==='declined' || err.code==='rate_limited')) return; }
+  }
+  const a = el('a');
+  a.href = URL.createObjectURL(new Blob([text],{type:'application/json'}));
+  a.download = name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+$('#btnSave').addEventListener('click', ()=>{
+  const base = state.meta.project ? state.meta.project.replace(/[\\/:*?"<>|]/g,'_').slice(0,60) : 'photo-doc';
+  saveFile(base + '.json', JSON.stringify(state));
+});
+$('#btnOpen').addEventListener('click', ()=>{ $('#projPick').value=''; $('#projPick').click(); });
+$('#projPick').addEventListener('change', e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    try{
+      const d = JSON.parse(fr.result);
+      if(!d.sections) throw new Error('bad');
+      Object.assign(state, d);
+      state.sections.forEach(s=>s.photos.forEach(p=>{ if(!p.id) p.id = uid++; }));
+      syncInputs(); render();
+    }catch(_){ alert('ไฟล์โปรเจกต์ไม่ถูกต้อง'); }
+  };
+  fr.readAsText(f);
+});
+function syncInputs(){
+  ['doc','project','location','contract','contractor','period'].forEach(k=> $('#m_'+k).value = state.meta[k]||'');
+  $('#perPage').value = state.opt.perPage; $('#fitMode').value = state.opt.fit;
+  $('#showCap').value = state.opt.showCap; $('#showNum').value = state.opt.showNum;
+  $('#headEvery').value = state.opt.headEvery; $('#showPage').value = state.opt.showPage;
+  $('#signMode').value = state.opt.signMode || 'every';
+  $('#fs').value = state.opt.fs || 1; $('#imgSize').value = state.opt.imgSize || 'm';
+}
+
+syncInputs();
+render();
+window.__state = state;
+})();
+</script>
+
+</body>
+</html>
