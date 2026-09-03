@@ -1,5 +1,7 @@
 # เอกสารภาพถ่ายประกอบการส่งงานก่อสร้าง (Photo Report Builder)
 
+**ใช้งานออนไลน์:** https://dstaokung.github.io/photo-report/
+
 เว็บแอปไฟล์เดียว (`index.html`) ทำงานทั้งหมดในเบราว์เซอร์ ไม่ต้องมีเซิร์ฟเวอร์ ไม่ส่งรูปขึ้นอินเทอร์เน็ต
 
 ## ความสามารถ
@@ -28,6 +30,8 @@
 3. หน้าถัดมากด **uploading an existing file** → ลากไฟล์ `index.html` (และ `README.md`) มาวาง → **Commit changes**
 4. เข้าแท็บ **Settings** → เมนูซ้าย **Pages** → หัวข้อ *Build and deployment* → Source: **Deploy from a branch**, Branch: **main** / **/(root)** → **Save**
 5. รอ 1–2 นาที แล้วรีเฟรช จะได้ลิงก์ `https://<ชื่อบัญชี>.github.io/photo-report/`
+
+ของโปรเจกต์นี้คือ https://dstaokung.github.io/photo-report/
 
 อัพเดตโปรแกรมภายหลัง: อัพโหลดไฟล์ `index.html` ทับของเดิมใน repo
 
