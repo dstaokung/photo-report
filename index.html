@@ -96,6 +96,27 @@ label.f{display:block;font-size:12.5px;color:var(--muted);margin-bottom:3px}
 .imgbox{flex:1 1 0;min-height:0;max-height:var(--imgmax);border:1px solid #555;background:#fff;overflow:hidden;display:flex;
   align-items:center;justify-content:center}
 .imgbox img{width:100%;height:100%;display:block}
+/* รูปแนวตั้ง: กรอบเส้นขอบแนบพอดีกับรูป (ไม่เหลือขอบขาวสองข้าง) */
+.slot.pt .imgbox{border:0;background:transparent}
+.slot.pt .imgbox img{width:auto;height:auto;max-width:100%;max-height:100%;min-width:0;min-height:0;
+  box-sizing:border-box;border:1px solid #555;object-fit:contain}
+/* รูปแนวตั้ง 2 รูป วางคู่ซ้าย–ขวาในหน้าเดียว */
+.slot.nb .imgbox{border:0}
+.slot.nb.pt .imgbox img{border:0}
+/* รูปที่ครอป/ซูม: เต็มกรอบ แล้วเลื่อนตำแหน่งตามที่ตั้งไว้ */
+.slot.cr .imgbox{border:0;background:#fff}
+.slot.cr:not(.nb) .imgbox{border:1px solid #555}
+.slot.cr .imgbox img{width:100%;height:100%;max-width:none;max-height:none;border:0;object-fit:cover}
+#cropDlg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:10px}
+#cropDlg.on{display:flex}
+.cropCard{background:#fff;border-radius:12px;padding:14px;max-width:96vw;display:flex;flex-direction:column;gap:10px;align-items:center;font-family:var(--thai)}
+#cropFrame{position:relative;overflow:hidden;background:#ddd;border:1px solid #555;cursor:grab;touch-action:none}
+#cropFrame.drag{cursor:grabbing}
+#cropFrame img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.cropBar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+.cropBar input[type=range]{width:200px}
+.cropHint{font-size:12px;color:#666}
+.pp2.side{grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr)}
 .fit .imgbox img{object-fit:contain}
 .fill .imgbox img{object-fit:cover}
 .cap{margin-top:1.5mm;text-align:center;font-size:calc(12pt * var(--fs));min-height:1.3em;outline:none;line-height:1.3}
@@ -211,6 +232,12 @@ label.f{display:block;font-size:12.5px;color:var(--muted);margin-bottom:3px}
         <div><label class="f">ขนาดตัวอักษรในเอกสาร</label><select id="fs">
           <option value="1" selected>มาตรฐาน</option><option value="0.9">เล็ก</option><option value="0.8">เล็กมาก</option>
         </select></div>
+        <div><label class="f">เส้นกรอบรูป</label><select id="borderMode">
+          <option value="0" selected>ไม่มีเส้นกรอบ</option><option value="1">มีเส้นกรอบ</option>
+        </select></div>
+        <div><label class="f">รูปแนวตั้ง</label><select id="portraitMode">
+          <option value="auto" selected>อัตโนมัติ (รูปตั้ง 2 รูปวางคู่ข้างกัน)</option><option value="off">แบบเดิม</option>
+        </select></div>
         <div><label class="f">ตำแหน่งลายเซ็น</label><select id="signMode">
           <option value="every" selected>ท้ายทุกหน้า</option>
           <option value="none">ไม่มีลายเซ็น</option>
@@ -224,6 +251,16 @@ label.f{display:block;font-size:12.5px;color:var(--muted);margin-bottom:3px}
 
 <div id="pages"></div>
 
+<div id="cropDlg" class="no-print"><div class="cropCard">
+  <div class="cropHint">ลากรูปเพื่อเลื่อนตำแหน่ง · เลื่อนแถบหรือหมุนลูกกลิ้งเมาส์เพื่อซูม · กรอบนี้คือสัดส่วนของช่องรูปในหน้ากระดาษ</div>
+  <div id="cropFrame"><img alt=""></div>
+  <div class="cropBar">
+    <span>ซูม</span><input type="range" id="cropZ" min="1" max="4" step="0.05" value="1"><span id="cropZv">100%</span>
+    <button id="cropReset" type="button">รีเซ็ต (ไม่ครอป)</button>
+    <button id="cropCancel" type="button">ยกเลิก</button>
+    <button id="cropOk" type="button" class="primary">ตกลง</button>
+  </div>
+</div></div>
 <input type="file" id="filePick" accept="image/*" multiple hidden>
 <input type="file" id="projPick" accept="application/json,.json" hidden>
 
@@ -243,7 +280,7 @@ const state = {
   sections: DEFAULT_SECTIONS.map(t=>({title:t,photos:[]})),
   committee: [ {name:'',pos:'ประธานกรรมการ'},{name:'',pos:'กรรมการ'},{name:'',pos:'กรรมการ'} ],
   inspectors: [ {name:'',pos:'ผู้ควบคุมงาน'} ],
-  opt:{perPage:2,fit:'fit',showCap:1,showNum:1,headEvery:1,showPage:1,signMode:'every',fs:1,imgSize:'m'}
+  opt:{perPage:2,fit:'fit',showCap:1,showNum:1,headEvery:1,showPage:1,signMode:'every',fs:1,imgSize:'m',portrait:'auto',border:0}
 };
 
 /* ---------- images ---------- */
@@ -259,7 +296,7 @@ function readImage(file){
         c.width = Math.max(1,Math.round(img.width*sc));
         c.height = Math.max(1,Math.round(img.height*sc));
         c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-        res({id:uid++, src:c.toDataURL('image/jpeg',0.85), caption:'', name:file.name, time:file.lastModified||0});
+        res({id:uid++, src:c.toDataURL('image/jpeg',0.85), w:c.width, h:c.height, caption:'', name:file.name, time:file.lastModified||0});
       };
       img.onerror = () => res(null);
       img.src = fr.result;
@@ -297,6 +334,7 @@ function rotatePhoto(si, i, deg){
     ctx.rotate(deg * Math.PI / 180);
     ctx.drawImage(img, -sw/2, -sh/2);
     p.src = c.toDataURL('image/jpeg', 0.9);
+    p.w = c.width; p.h = c.height; delete p.crop;
     render();
   };
   img.src = p.src;
@@ -374,12 +412,41 @@ function renderPanel(){
 
 /* ---------- paper render ---------- */
 const IMG_MAX = {1:{s:150,m:175,l:205},2:{s:75,m:88,l:103},4:{s:68,m:78,l:92},6:{s:46,m:52,l:62}};
-function imgMaxMM(){
-  const t = IMG_MAX[state.opt.perPage] || IMG_MAX[2];
-  return t[state.opt.imgSize] || t.m;
+const IMG_MAX_SIDE = {s:105,m:120,l:140};   /* 2 รูปแนวตั้งวางคู่ข้างกัน: ความสูงกรอบรูป (มม.) */
+/* ไม่มีแถบลายเซ็นท้ายหน้า → พื้นที่รูปขยายลงมา: ขนาดรูปขยับขึ้น 1 ระดับ และระดับ "ใหญ่" = เต็มพื้นที่ที่เหลือ */
+const hasSignStrip = () => (state.opt.signMode==='every' || state.opt.signMode==='both') && (state.committee.length + state.inspectors.length) > 0;
+function imgMaxMM(side, withSign){
+  if(withSign === undefined) withSign = hasSignStrip();
+  const t = side ? IMG_MAX_SIDE : (IMG_MAX[state.opt.perPage] || IMG_MAX[2]);
+  let k = ['s','m','l'].indexOf(state.opt.imgSize); if(k<0) k = 1;
+  if(!withSign){ k++; if(k>2) return null; }
+  else if(!state.committee.length){ k = Math.min(2, k+1); }   /* ไม่มีกรรมการ เหลือแต่ผู้ควบคุมงานท้ายหน้า */
+  return t[['s','m','l'][k]];
 }
-function sheetStyle(){
-  return ' style="--fs:'+state.opt.fs+';--imgmax:'+imgMaxMM()+'mm"';
+function sheetStyle(side){
+  const mm = imgMaxMM(side);
+  return ' style="--fs:'+state.opt.fs+';--imgmax:'+(mm===null?'none':mm+'mm')+'"';
+}
+/* ---------- portrait helpers ---------- */
+const portraitOn = () => state.opt.portrait !== 'off';
+const isPortrait = p => !!(p && p.w && p.h && p.h > p.w * 1.05);
+/* โปรเจกต์เก่าไม่มีขนาดรูปเก็บไว้ → อ่านจากรูปแล้ววาดหน้ากระดาษใหม่ */
+let probing = false;
+function probeDims(){
+  if(probing) return false;
+  const todo = [];
+  state.sections.forEach(sec=>sec.photos.forEach(p=>{ if(!p.w || !p.h) todo.push(p); }));
+  if(!todo.length) return false;
+  probing = true;
+  let left = todo.length;
+  const done = () => { if(--left === 0){ probing = false; renderPaper(); } };
+  todo.forEach(p=>{
+    const im = new Image();
+    im.onload = () => { p.w = im.naturalWidth; p.h = im.naturalHeight; done(); };
+    im.onerror = () => { p.w = p.h = 1; done(); };
+    im.src = p.src;
+  });
+  return true;
 }
 /* ย่อรูป/ตัวอักษรอัตโนมัติเมื่อเนื้อหาหน้านั้นล้นกระดาษ (เช่นชื่อโครงการยาว หรือกรรมการหลายท่าน) */
 function autofit(){
@@ -387,7 +454,7 @@ function autofit(){
   const LIMIT = 297 * 96 / 25.4 + 2;
   document.querySelectorAll('.sheet').forEach(sh=>{
     const pa = sh.querySelector('.photoArea.fixed');
-    let mm = imgMaxMM(), fs = state.opt.fs, guard = 0;
+    let mm = parseFloat(sh.style.getPropertyValue('--imgmax')) || imgMaxMM(), fs = state.opt.fs, guard = 0;
     while(guard++ < 40 && sh.offsetHeight > LIMIT){
       if(pa && mm > 30){ mm -= 3; sh.style.setProperty('--imgmax', mm+'mm'); }
       else if(fs > 0.7){ fs = +(fs - 0.04).toFixed(2); sh.style.setProperty('--fs', fs); }
@@ -410,17 +477,22 @@ function headHTML(secTitle, si){
   h += '</div>';
   return h;
 }
-function slotHTML(p, si, i){
+const cropCSS = c => 'object-position:'+c.x+'% '+c.y+'%;transform:scale('+c.z+');transform-origin:'+c.x+'% '+c.y+'%';
+function slotHTML(p, si, i, side){
   const o = state.opt;
+  const cr = p.crop && p.crop.z ? p.crop : null;
+  const pt = portraitOn() && isPortrait(p);
+  const mode = pt ? ((side && o.fit==='fill') ? 'fill' : 'fit') : o.fit;
   const num = o.showNum ? 'รูปที่ '+(i+1)+' ' : '';
-  return '<div class="slot '+o.fit+'" data-s="'+si+'" data-i="'+i+'" draggable="true">'+
+  return '<div class="slot '+mode+(pt?' pt':'')+(cr?' cr':'')+(o.border===1?'':' nb')+'" data-s="'+si+'" data-i="'+i+'" draggable="true">'+
     '<div class="slotTools no-print">'+
       '<button data-act="prev" title="เลื่อนขึ้น/ก่อนหน้า">◀</button>'+
       '<button data-act="next" title="เลื่อนลง/ถัดไป">▶</button>'+
+      '<button data-act="crop" title="ครอป / ซูม / เลื่อนตำแหน่งรูป (ดับเบิลคลิกที่รูปก็ได้)">✂</button>'+
       '<button data-act="rot" title="หมุนรูป 90°">↻</button>'+
       '<button data-act="del" title="ลบรูป">✕</button>'+
     '</div>'+
-    '<div class="imgbox"><img src="'+p.src+'" alt=""></div>'+
+    '<div class="imgbox"><img src="'+p.src+'" alt=""'+(cr?' style="'+cropCSS(cr)+'"':'')+'></div>'+
     (o.showCap ? '<div class="cap" contenteditable="true" data-cap="1" data-s="'+si+'" data-i="'+i+'" data-ph="'+num+'(คลิกเพื่อพิมพ์คำบรรยาย)">'+esc(p.caption)+'</div>' : '')+
   '</div>';
 }
@@ -456,6 +528,10 @@ function renderPaper(){
       sheets.push({type:'p', si, start:i, items:sec.photos.slice(i,i+o.perPage)});
     }
   });
+  if(probeDims()) return;   /* รอรู้ขนาดรูปก่อน แล้วจะเรียกวาดใหม่เอง */
+  sheets.forEach(sh=>{
+    sh.side = sh.type==='p' && o.perPage===2 && portraitOn() && sh.items.length===2 && sh.items.every(isPortrait);
+  });
   const hasPhotos = sheets.length>0;
   const signers = state.committee.length + state.inspectors.length;
   if(signers && (o.signMode==='last' || o.signMode==='both' || (!hasPhotos && o.signMode!=='none'))) sheets.push({type:'sign'});
@@ -466,13 +542,13 @@ function renderPaper(){
   if(!hasPhotos) html += '<div class="empty no-print">ยังไม่มีรูปภาพ — เพิ่มรูปในหัวข้อ “2. รูปภาพ” ด้านบน<br>(หน้าลายเซ็นแสดงตัวอย่างไว้ให้ด้านล่างแล้ว)</div>';
 
   sheets.forEach((sh,pi)=>{
-    html += '<div class="sheet"'+sheetStyle()+'>';
+    html += '<div class="sheet"'+sheetStyle(sh.side)+'>';
     if(sh.type==='p'){
       const showHead = o.headEvery ? true : (sh.start===0);
       html += showHead ? headHTML(state.sections[sh.si].title, sh.si) : headHTML('', sh.si);
-      const withSign = (o.signMode==='every' || o.signMode==='both');
-      html += '<div class="photoArea pp'+o.perPage+(withSign?' fixed':'')+'">';
-      sh.items.forEach((p,k)=> html += slotHTML(p, sh.si, sh.start+k));
+      const withSign = hasSignStrip();
+      html += '<div class="photoArea pp'+o.perPage+(sh.side?' side':'')+(withSign?' fixed':'')+'">';
+      sh.items.forEach((p,k)=> html += slotHTML(p, sh.si, sh.start+k, sh.side));
       for(let k=sh.items.length;k<o.perPage;k++) html += '<div class="slot"></div>';
       html += '</div>';
       if(withSign) html += signStripHTML(state.committee) + '<div class="spacer"></div>' + signStripHTML(state.inspectors);
@@ -611,7 +687,13 @@ $('#pages').addEventListener('click', e=>{
   if(act==='prev') shift(si,i,-1);
   if(act==='next') shift(si,i,1);
   if(act==='rot') rotatePhoto(si,i,90);
+  if(act==='crop') openCrop(si,i);
   if(act==='del'){ state.sections[si].photos.splice(i,1); render(); }
+});
+$('#pages').addEventListener('dblclick', e=>{
+  const b = e.target.closest('.imgbox'); if(!b) return;
+  const sl = b.closest('.slot'); if(!sl || sl.dataset.s===undefined) return;
+  openCrop(+sl.dataset.s, +sl.dataset.i);
 });
 $('#pages').addEventListener('input', e=>{
   const c = e.target.closest('[data-cap]'); if(!c) return;
@@ -623,15 +705,77 @@ $('#pages').addEventListener('paste', e=>{
   document.execCommand('insertText', false, (e.clipboardData||window.clipboardData).getData('text'));
 });
 
+/* ---------- crop / zoom dialog ---------- */
+let cd = null;
+const cdFrame = $('#cropFrame'), cdImg = cdFrame.querySelector('img'), cdZ = $('#cropZ');
+function cdApply(){
+  cdImg.style.cssText = cropCSS(cd);
+  cdZ.value = cd.z; $('#cropZv').textContent = Math.round(cd.z*100)+'%';
+}
+function cdLen(){   /* ระยะที่เลื่อนได้ (หน่วยพิกเซลของกรอบ) ต่อแกน */
+  const c = Math.max(cd.W/cd.nw, cd.H/cd.nh);
+  return { x: cd.W*(1-1/cd.z) + (cd.nw*c - cd.W), y: cd.H*(1-1/cd.z) + (cd.nh*c - cd.H) };
+}
+function openCrop(si, i){
+  const p = state.sections[si] && state.sections[si].photos[i]; if(!p) return;
+  const box = document.querySelector('.slot[data-s="'+si+'"][data-i="'+i+'"] .imgbox');
+  const r = box ? box.getBoundingClientRect() : null;
+  const asp = (r && r.width > 10 && r.height > 10) ? r.width/r.height : 4/3;
+  let W = Math.min(innerWidth*0.86, 760), H = W/asp;
+  const maxH = innerHeight*0.58;
+  if(H > maxH){ H = maxH; W = H*asp; }
+  cdFrame.style.width = W+'px'; cdFrame.style.height = H+'px';
+  const c0 = p.crop || {z:1,x:50,y:50};
+  cd = {si, i, W, H, nw:p.w||1, nh:p.h||1, z:c0.z, x:c0.x, y:c0.y};
+  cdImg.onload = () => { cd.nw = cdImg.naturalWidth || cd.nw; cd.nh = cdImg.naturalHeight || cd.nh; };
+  cdImg.src = p.src;
+  cdApply();
+  $('#cropDlg').classList.add('on');
+}
+function closeCrop(){ $('#cropDlg').classList.remove('on'); cd = null; }
+cdZ.addEventListener('input', ()=>{ if(!cd) return; cd.z = +cdZ.value; cdApply(); });
+cdFrame.addEventListener('wheel', e=>{
+  if(!cd) return; e.preventDefault();
+  cd.z = Math.min(4, Math.max(1, +(cd.z + (e.deltaY < 0 ? 0.1 : -0.1)).toFixed(2))); cdApply();
+}, {passive:false});
+let cdDrag = null;
+cdFrame.addEventListener('pointerdown', e=>{
+  if(!cd) return; cdDrag = {x:e.clientX, y:e.clientY}; cdFrame.classList.add('drag'); cdFrame.setPointerCapture(e.pointerId);
+});
+cdFrame.addEventListener('pointermove', e=>{
+  if(!cd || !cdDrag) return;
+  const dx = e.clientX - cdDrag.x, dy = e.clientY - cdDrag.y;
+  cdDrag = {x:e.clientX, y:e.clientY};
+  const L = cdLen();
+  if(L.x > 0.5) cd.x = Math.min(100, Math.max(0, +(cd.x - dx/(cd.z*L.x)*100).toFixed(2)));
+  if(L.y > 0.5) cd.y = Math.min(100, Math.max(0, +(cd.y - dy/(cd.z*L.y)*100).toFixed(2)));
+  cdApply();
+});
+['pointerup','pointercancel'].forEach(t=> cdFrame.addEventListener(t, ()=>{ cdDrag = null; cdFrame.classList.remove('drag'); }));
+$('#cropOk').addEventListener('click', ()=>{
+  if(!cd) return;
+  const p = state.sections[cd.si].photos[cd.i];
+  p.crop = {z:cd.z, x:cd.x, y:cd.y};
+  closeCrop(); render();
+});
+$('#cropReset').addEventListener('click', ()=>{
+  if(!cd) return;
+  delete state.sections[cd.si].photos[cd.i].crop;
+  closeCrop(); render();
+});
+$('#cropCancel').addEventListener('click', closeCrop);
+$('#cropDlg').addEventListener('click', e=>{ if(e.target.id==='cropDlg') closeCrop(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && cd) closeCrop(); });
+
 /* meta + options */
 ['doc','project','location','contract','contractor','period'].forEach(k=>{
   $('#m_'+k).addEventListener('input', e=>{ state.meta[k]=e.target.value; renderPaperOnly(); });
 });
-const optMap = {perPage:'perPage',fitMode:'fit',showCap:'showCap',showNum:'showNum',headEvery:'headEvery',showPage:'showPage',signMode:'signMode',fs:'fs',imgSize:'imgSize'};
+const optMap = {perPage:'perPage',fitMode:'fit',showCap:'showCap',showNum:'showNum',headEvery:'headEvery',showPage:'showPage',signMode:'signMode',fs:'fs',imgSize:'imgSize',portraitMode:'portrait',borderMode:'border'};
 Object.keys(optMap).forEach(id=>{
   $('#'+id).addEventListener('change', e=>{
     const v = e.target.value;
-    state.opt[optMap[id]] = (id==='fitMode'||id==='signMode'||id==='imgSize') ? v : +v;
+    state.opt[optMap[id]] = (id==='fitMode'||id==='signMode'||id==='imgSize'||id==='portraitMode') ? v : +v;
     render();
   });
 });
@@ -705,6 +849,8 @@ function syncInputs(){
   $('#headEvery').value = state.opt.headEvery; $('#showPage').value = state.opt.showPage;
   $('#signMode').value = state.opt.signMode || 'every';
   $('#fs').value = state.opt.fs || 1; $('#imgSize').value = state.opt.imgSize || 'm';
+  $('#portraitMode').value = state.opt.portrait || 'auto';
+  $('#borderMode').value = state.opt.border===1 ? '1' : '0';
 }
 
 syncInputs();
