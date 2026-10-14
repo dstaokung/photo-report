@@ -870,7 +870,7 @@ async function saveFile(name, text){
 }
 $('#btnSave').addEventListener('click', ()=>{
   const base = state.meta.project ? state.meta.project.replace(/[\\/:*?"<>|]/g,'_').slice(0,60) : 'photo-doc';
-  saveFile(base + '.json', JSON.stringify(state));
+  saveWithPicker(base + '.json', 'application/json', 'ไฟล์โปรเจกต์ (.json)', async()=>new Blob([JSON.stringify(state)],{type:'application/json'}));
 });
 $('#btnOpen').addEventListener('click', ()=>{ $('#projPick').value=''; $('#projPick').click(); });
 $('#projPick').addEventListener('change', e=>{
@@ -1160,17 +1160,34 @@ async function saveBlob(name, blob){
   a.download = name; a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
 }
+/* เลือกปลายทาง/ชื่อไฟล์ที่จะบันทึก (Chrome/Edge) — ถ้าเบราว์เซอร์ไม่รองรับ (เช่น Firefox) จะดาวน์โหลดตามปกติ */
+async function saveWithPicker(name, mime, desc, makeBlob){
+  const ext = (name.match(/\.[^.]+$/)||['.bin'])[0];
+  let handle = null;
+  if(typeof window.showSaveFilePicker === 'function'){
+    try{ handle = await window.showSaveFilePicker({id:'photoreport'+ext.slice(1), suggestedName:name, types:[{description:desc, accept:{[mime]:[ext]}}]}); }
+    catch(err){ if(err && err.name==='AbortError') return false; handle = null; }
+  }
+  const blob = await makeBlob();
+  if(!blob) return false;
+  if(handle){
+    try{ const w = await handle.createWritable(); await w.write(blob); await w.close(); return true; }catch(_){ /* เขียนไม่ได้ → ดาวน์โหลดแทน */ }
+  }
+  await saveBlob(name, blob);
+  return true;
+}
 $('#btnDocx').addEventListener('click', async ()=>{
   const b = $('#btnDocx'), t0 = b.textContent;
   if(!window.docx){ alert('ไม่พบไลบรารีสร้างไฟล์ .docx'); return; }
-  b.disabled = true; b.textContent = 'กำลังสร้างไฟล์...';
+  if(!state.sections.some(s=>s.photos.length) && !(state.committee.length + state.inspectors.length)){
+    alert('ยังไม่มีรูปหรือรายชื่อลายเซ็นให้สร้างเอกสาร'); return;
+  }
+  const base = state.meta.project ? state.meta.project.replace(/[\\/:*?"<>|]/g,'_').slice(0,60) : 'photo-doc';
   try{
-    const blob = await buildDocx();
-    if(!blob){ alert('ยังไม่มีรูปหรือรายชื่อลายเซ็นให้สร้างเอกสาร'); }
-    else{
-      const base = state.meta.project ? state.meta.project.replace(/[\\/:*?"<>|]/g,'_').slice(0,60) : 'photo-doc';
-      await saveBlob(base + '.docx', blob);
-    }
+    await saveWithPicker(base + '.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'เอกสาร Word (.docx)', async()=>{
+      b.disabled = true; b.textContent = 'กำลังสร้างไฟล์...';
+      return await buildDocx();
+    });
   }catch(err){ console.error(err); alert('สร้างไฟล์ .docx ไม่สำเร็จ: '+(err && err.message || err)); }
   b.disabled = false; b.textContent = t0;
 });
