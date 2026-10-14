@@ -186,7 +186,7 @@ label.f{display:block;font-size:12.5px;color:var(--muted);margin-bottom:3px}
         <div><label class="f">ชื่อเอกสาร (หัวกระดาษ)</label><input id="m_doc" placeholder="ภาพถ่ายประกอบการส่งงาน"></div>
         <div><label class="f">ชื่อโครงการ</label><input id="m_project" placeholder="โครงการก่อสร้างถนน คสล. หมู่ที่ ..."></div>
         <div><label class="f">สถานที่ก่อสร้าง</label><input id="m_location" placeholder="หมู่ที่ ... ตำบล ... อำเภอ ..."></div>
-        <div><label class="f">สัญญาเลขที่ / วันที่</label><input id="m_contract" placeholder="เลขที่ .../2569 ลงวันที่ ..."></div>
+        <div><label class="f">สัญญาเลขที่ / วันที่ (ไม่ต้องพิมพ์คำว่า "เลขที่")</label><input id="m_contract" placeholder=".../2569 ลงวันที่ ..."></div>
         <div><label class="f">ผู้รับจ้าง</label><input id="m_contractor" placeholder="บริษัท/ห้างหุ้นส่วน ..."></div>
         <div><label class="f">งวดงาน / วันที่ตรวจ</label><input id="m_period" placeholder="งวดที่ 1 ตรวจรับวันที่ ..."></div>
       </div>
@@ -272,7 +272,7 @@ const el = (t,c) => { const n=document.createElement(t); if(c) n.className=c; re
 const esc = s => (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 const DEFAULT_SECTIONS = ['รูปก่อนดำเนินการ','รูประหว่างดำเนินการ','รูปดำเนินการแล้วเสร็จ','รูปการตรวจรับพัสดุ'];
-const COM_POS = ['ประธานกรรมการ','กรรมการ','กรรมการ','กรรมการ','กรรมการ'];
+const COM_POS = ['ประธานกรรมการ','กรรมการ','กรรมการ','กรรมการ','กรรมการ','กรรมการ','กรรมการ'];
 
 let uid = 1;
 const state = {
@@ -390,7 +390,7 @@ function renderPanel(){
 
   const nCom = $('#nCom'), nSup = $('#nSup');
   if(!nCom.options.length){
-    [0,1,2,3,4,5].forEach(n=>nCom.add(new Option(n===0?'ไม่มี':(n+' ท่าน'), n)));
+    [0,1,2,3,4,5,6,7].forEach(n=>nCom.add(new Option(n===0?'ไม่มี':(n+' ท่าน'), n)));
     [0,1,2].forEach(n=>nSup.add(new Option(n===0?'ไม่มี':(n+' ท่าน'), n)));
   }
   nCom.value = state.committee.length; nSup.value = state.inspectors.length;
@@ -469,7 +469,7 @@ function headHTML(secTitle, si){
   if(m.project) h += '<div class="projName">'+esc(m.project)+'</div>';
   const bits = [];
   if(m.location) bits.push('สถานที่: '+m.location);
-  if(m.contract) bits.push('สัญญา'+m.contract);
+  if(m.contract){ const c=m.contract.trim(); bits.push(/^(สัญญา)?\s*เลขที่/.test(c) ? (c.startsWith('สัญญา')?c:'สัญญา'+c) : 'สัญญาเลขที่ '+c); }
   if(m.contractor) bits.push('ผู้รับจ้าง: '+m.contractor);
   if(m.period) bits.push(m.period);
   if(bits.length) h += '<div class="metaLine">'+esc(bits.join('   |   '))+'</div>';
