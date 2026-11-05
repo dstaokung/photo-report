@@ -143,8 +143,11 @@ label.f{display:block;font-size:12.5px;color:var(--muted);margin-bottom:3px}
 .signBody{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-evenly;padding:4mm 0}
 .signGroup{margin:0}
 .signGroupTitle{font-size:calc(14pt * var(--fs));font-weight:700;margin:0}
-.sigItem{margin:0;text-align:center;font-size:calc(13pt * var(--fs));line-height:1.8}
-.sigItem .dots{display:inline-block;min-width:70mm;border-bottom:1px dotted #000;height:1.2em;vertical-align:-2px}
+.sigItem{margin:0;display:grid;grid-template-columns:auto 1fr 45mm;column-gap:2mm;width:150mm;margin-left:auto;margin-right:auto;font-size:calc(13pt * var(--fs));line-height:1.8}
+.sigItem .dots{display:block;min-width:0;height:1.2em;border-bottom:1px dotted #000}
+.sigItem .sigPos{text-align:left}
+.sigItem .sigName{grid-column:2;text-align:center}
+.sigItem .sigName .dots{display:inline-block;min-width:60mm;margin:0;vertical-align:-2px}
 .sigNote{font-size:13pt;color:#333;margin-top:2mm}
 
 .empty{width:210mm;margin:0 auto;padding:40px;text-align:center;color:var(--muted);
@@ -161,6 +164,17 @@ label.f{display:block;font-size:12.5px;color:var(--muted);margin-bottom:3px}
 @page{size:A4 portrait;margin:0}
 @media print{
   :root{--thai:'TH SarabunIT๙','TH Sarabun New','Sarabun','Tahoma',system-ui,sans-serif}
+  /* ขนาดตัวอักษรตอนพิมพ์/PDF (ฟอนต์ IT๙ ตัวเล็ก จึงเพิ่ม +1.5pt จากหน้าจอ) */
+  .docTitle{font-size:calc(17.5pt * var(--fs))}
+  .projName{font-size:calc(15.5pt * var(--fs))}
+  .metaLine{font-size:calc(13pt * var(--fs))}
+  .secTitleP{font-size:calc(15.5pt * var(--fs))}
+  .cap{font-size:calc(13.5pt * var(--fs))}
+  .sheetFoot{font-size:calc(11.5pt * var(--fs))}
+  .sg{font-size:calc(12.5pt * var(--fs))}
+  .signGroupTitle{font-size:calc(15.5pt * var(--fs))}
+  .sigItem{font-size:calc(14.5pt * var(--fs))}
+  .sigNote{font-size:14.5pt}
   body{background:#fff}
   .no-print{display:none!important}
   #pages{padding:0}
@@ -562,8 +576,8 @@ function signHTML(){
     let s = '<div class="signGroupTitle">'+esc(title)+'</div>';
     arr.forEach(m=>{
       const nm = m.name ? esc(m.name) : '';
-      s += '<div class="sigItem">ลงชื่อ <span class="dots"></span> '+esc(m.pos)+
-           '<div>( '+(nm || '<span class="dots" style="min-width:60mm"></span>')+' )</div></div>';
+      s += '<div class="sigItem"><span>ลงชื่อ</span><span class="dots"></span><span class="sigPos">'+esc(m.pos)+'</span>'+
+           '<div class="sigName">( '+(nm || '<span class="dots" style="min-width:60mm"></span>')+' )</div></div>';
     });
     return s;
   };
